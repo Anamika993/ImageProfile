@@ -120,8 +120,10 @@ const ImageDetailScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={{ uri: image }} style={styles.detailImage} resizeMode="cover" />
-
+      <View style={styles.imageWrapper}>
+<Image source={{ uri: image }} style={styles.detailImage} resizeMode="contain" />
+      </View>
+      
       <View style={styles.formContainer}>
         <Text style={styles.formTitle}>Submit Your Information</Text>
 
@@ -193,10 +195,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  imageWrapper: {
+      borderRadius: 12,
+      overflow: "hidden",
+      backgroundColor: "#e0e0e0",
+      elevation: 3,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+  },
   detailImage: {
     width: '100%',
-    height: 300,
-    marginBottom: responsiveHeight(2),
+    aspectRatio:'3/2',
   },
   formContainer: {
     padding: responsiveWidth(3),

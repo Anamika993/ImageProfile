@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,13 @@ import {
   Dimensions,
   ActivityIndicator,
   StatusBar,
-} from 'react-native';
-import { useMutation } from '@tanstack/react-query';
-import { fetcher } from '~/utils/ApiService';
+} from "react-native";
+import { useMutation } from "@tanstack/react-query";
+import { fetcher } from "~/utils/ApiService";
 
-const { width } = Dimensions.get('window');
-const numColumns = 2;
-const itemWidth = (width - 32) / numColumns;
+const { width } = Dimensions.get("window");
+const numColumns = 1;
+const itemWidth = width - 32;
 const pageSize = 10;
 
 const ImageGallery = ({ navigation }) => {
@@ -28,18 +28,20 @@ const ImageGallery = ({ navigation }) => {
   const getImages = useMutation({
     mutationFn: async (offsetValue) =>
       fetcher({
-        method: 'post',
-        url: '/getdata.php',
+        method: "post",
+        url: "/getdata.php",
         data: {
-          user_id: '108',
+          user_id: "108",
           offset: offsetValue.toString(),
-          type: 'popular',
+          type: "popular",
         },
       }),
     onSuccess: (data) => {
       if (data && data.images && Array.isArray(data.images)) {
         setImages((prevImages) => {
-          const newImages = refreshing ? data.images : [...prevImages, ...data.images];
+          const newImages = refreshing
+            ? data.images
+            : [...prevImages, ...data.images];
           return newImages;
         });
         setOffset((prevOffset) => prevOffset + 1);
@@ -47,14 +49,14 @@ const ImageGallery = ({ navigation }) => {
           setHasMore(false);
         }
       } else {
-        console.log('No valid images in response, stopping pagination');
+        console.log("No valid images in response, stopping pagination");
         setHasMore(false);
       }
       setIsLoading(false);
       setRefreshing(false);
     },
     onError: (error) => {
-      console.error('Error fetching images:', error);
+      console.error("Error fetching images:", error);
       setIsLoading(false);
       setRefreshing(false);
     },
@@ -81,18 +83,18 @@ const ImageGallery = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        style={[styles.imageContainer, { marginLeft: index % 2 === 0 ? 0 : 8 }]}
+        style={styles.imageContainer}
         activeOpacity={0.7}
         onPress={() => {
-          navigation.navigate('ImageDetail', { image: item?.xt_image });
-        }}>
+          navigation.navigate("ImageDetail", { image: item?.xt_image });
+        }}
+      >
         <View style={styles.imageWrapper}>
           <Image
             source={{ uri: item.xt_image }}
-            style={[styles.image, { width: itemWidth, height: itemHeight }]}
-            resizeMode="cover"
+            style={[styles.image, { width: '100%', aspectRatio: '3/2' }]}
+            resizeMode="contain"
           />
-          <View style={styles.imageShadow} />
         </View>
       </TouchableOpacity>
     );
@@ -112,7 +114,11 @@ const ImageGallery = ({ navigation }) => {
         {isLoading && !refreshing ? (
           <ActivityIndicator size="small" color="#007AFF" />
         ) : (
-          <TouchableOpacity onPress={loadImages} style={styles.loadMoreButton} disabled={isLoading}>
+          <TouchableOpacity
+            onPress={loadImages}
+            style={styles.loadMoreButton}
+            disabled={isLoading}
+          >
             <Text style={styles.loadMoreText}>Load More</Text>
           </TouchableOpacity>
         )}
@@ -143,8 +149,7 @@ const ImageGallery = ({ navigation }) => {
         data={images}
         renderItem={renderImageItem}
         keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        numColumns={numColumns}
-        columnWrapperStyle={styles.columnWrapper}
+        numColumns={numColumns} 
         contentContainerStyle={styles.listContent}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmptyComponent}
@@ -158,37 +163,35 @@ const ImageGallery = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   header: {
     paddingVertical: 16,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   galleryTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
   },
   listContent: {
+    paddingHorizontal: 16,
     paddingBottom: 24,
   },
-  columnWrapper: {
-    paddingHorizontal: 16,
-    marginTop: 16,
-  },
   imageContainer: {
-    flex: 1,
-    maxWidth: itemWidth,
+    marginBottom: 16, 
+    width: itemWidth, 
+    alignSelf: "center", 
   },
   imageWrapper: {
     borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#e0e0e0',
+    overflow: "hidden",
+    backgroundColor: "#e0e0e0",
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -197,74 +200,74 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   imageShadow: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 40,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: "rgba(0,0,0,0.2)",
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
   },
   footer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   loadMoreButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: '#FF8A05',
+    backgroundColor: "#FF8A05",
     borderRadius: 25,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   loadMoreText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 100,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: 'black',
+    color: "black",
   },
   noImagesContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   noImagesText: {
     fontSize: 18,
-    color: '#666',
+    color: "#666",
     marginBottom: 16,
   },
   retryButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 20,
   },
   retryText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   endMessageContainer: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   endMessage: {
-    color: '#999',
+    color: "#999",
     fontSize: 14,
   },
 });
