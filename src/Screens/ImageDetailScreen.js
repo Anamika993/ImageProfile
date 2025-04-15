@@ -8,149 +8,123 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { fetcher } from '~/utils/ApiService';
 import { useRoute } from '@react-navigation/native';
+import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
 
-// ImageDetail component that shows when an image is tapped
 const ImageDetailScreen = ({ navigation }) => {
-    const route = useRoute();
+  const route = useRoute();
   const { image } = route.params;
-  console.log('ImageDetailScreen image:', image);
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    user_image:''
+    user_image: '',
   });
-  
+
   const [errors, setErrors] = useState({});
-  
-  // Form validation function
+
   const validateForm = () => {
     let isValid = true;
     const newErrors = {};
-    
-    // First name validation
+
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required';
       isValid = false;
     }
-    
-    // Last name validation
+
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
       isValid = false;
     }
-    
-    // Email validation
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim() || !emailRegex.test(formData.email)) {
       newErrors.email = 'Valid email is required';
       isValid = false;
     }
-    
-    // Phone validation
+
     const phoneRegex = /^\d{10}$/;
     if (!formData.phone.trim() || !phoneRegex.test(formData.phone)) {
       newErrors.phone = 'Valid 10-digit phone number is required';
       isValid = false;
     }
-    
+
     setErrors(newErrors);
     return isValid;
   };
-  
-  // Handle input changes
+
   const handleChange = (field, value) => {
     setFormData({
       ...formData,
-      [field]: value
+      [field]: value,
     });
-    
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors({
         ...errors,
-        [field]: null
+        [field]: null,
       });
     }
   };
-  
-  // Create form data for multipart submission
   const createFormData = () => {
     const data = new FormData();
-    
-    // Add form fields
+
     data.append('first_name', formData.firstName);
     data.append('last_name', formData.lastName);
     data.append('email', formData.email);
     data.append('phone', formData.phone);
     data.append('user_image', {
       uri: image,
+      name: 'profile.jpg',
       type: 'image/jpeg',
     });
-    
+
     return data;
   };
-  
-  // Mutation for submitting form data
+
   const submitForm = useMutation({
     mutationFn: async (requestData) => {
-        console.log('Submitting data to server');
-        
-         fetcher({
-          method: 'post',
-          url: '/savedata.php',
-          data: requestData,
-         
-        });
-      },
+      console.log('Submitting data to server');
+
+      fetcher({
+        method: 'post',
+        url: '/savedata.php',
+        data: requestData,
+      });
+    },
     onSuccess: (data) => {
       console.log('Form submission successful:', data);
-      Alert.alert(
-        "Success",
-        "Your information has been submitted successfully!",
-        [{ text: "OK", onPress: () => navigation.goBack() }]
-      );
+      Alert.alert('Success', 'User has been saved successfully!', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
     },
     onError: (error) => {
       console.error('Error submitting form:', error);
-      Alert.alert(
-        "Error",
-        "There was an error submitting your information. Please try again."
-      );
-    }
+      Alert.alert('Error', 'There was an error submitting your information. Please try again.');
+    },
   });
-  
-  // Handle form submission
+
   const handleSubmit = () => {
     if (validateForm()) {
       const data = createFormData();
       submitForm.mutate(data);
     } else {
-     console.log('Form validation failed:', errors);
+      console.log('Form validation failed:', errors);
     }
   };
-  
+
   return (
     <ScrollView style={styles.container}>
-      <Image
-        source={{ uri: image }}
-        style={styles.detailImage}
-        resizeMode="contain"
-      />
-      
-      <Text style={styles.imageTitle}>{image.title || 'Untitled'}</Text>
-      
+      <Image source={{ uri: image }} style={styles.detailImage} resizeMode="cover" />
+
       <View style={styles.formContainer}>
         <Text style={styles.formTitle}>Submit Your Information</Text>
-        
-        {/* First Name */}
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>First Name</Text>
           <TextInput
@@ -161,8 +135,7 @@ const ImageDetailScreen = ({ navigation }) => {
           />
           {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
         </View>
-        
-        {/* Last Name */}
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Last Name</Text>
           <TextInput
@@ -173,8 +146,7 @@ const ImageDetailScreen = ({ navigation }) => {
           />
           {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
         </View>
-        
-        {/* Email */}
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -187,8 +159,7 @@ const ImageDetailScreen = ({ navigation }) => {
           />
           {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
         </View>
-        
-        {/* Phone */}
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Phone Number</Text>
           <TextInput
@@ -201,13 +172,11 @@ const ImageDetailScreen = ({ navigation }) => {
           />
           {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
         </View>
-        
-        {/* Submit Button */}
+
         <TouchableOpacity
           style={styles.submitButton}
           onPress={handleSubmit}
-          disabled={submitForm.isLoading}
-        >
+          disabled={submitForm.isLoading}>
           {submitForm.isLoading ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
@@ -227,28 +196,22 @@ const styles = StyleSheet.create({
   detailImage: {
     width: '100%',
     height: 300,
-    marginBottom: 16,
-  },
-  imageTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: responsiveHeight(2),
   },
   formContainer: {
-    padding: 16,
+    padding: responsiveWidth(3),
   },
   formTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: responsiveHeight(2),
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: responsiveHeight(1),
   },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
+    fontSize: 18,
+    marginBottom: responsiveHeight(1),
   },
   input: {
     borderWidth: 1,
@@ -266,15 +229,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: '#007BFF',
-    padding: 16,
-    borderRadius: 4,
+    backgroundColor: '#FF8A05',
+    padding: responsiveWidth(4),
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: responsiveHeight(2),
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });
